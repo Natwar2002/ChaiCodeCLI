@@ -12,7 +12,7 @@ This project combines **automation, AI-driven workflows, and developer tools** i
 
 **Clone this repository**
    ```bash
-   git clone https://github.com/Natwar2002/WebMirror.git
+   git clone https://github.com/Natwar2002/ChaiCodeCLI.git
    cd WebMirror
    
    npm install
