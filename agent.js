@@ -2,10 +2,24 @@ import 'dotenv/config';
 import OpenAI from "openai";
 import getGithubUserInfoByUsername from './tools/getGithubUserInfoByUsername.js';
 import cloneWebsite from './tools/cloneWebsite.js';
+import {
+    executeCommand,
+    createDirectory,
+    writeFile,
+    readFile,
+    listDirectory,
+    checkExists
+} from './tools/createWebsite.js';
 
 const toolMap = {
     getGithubUserInfoByUsername,
-    cloneWebsite
+    cloneWebsite,
+    executeCommand,
+    createDirectory,
+    writeFile,
+    readFile,
+    listDirectory,
+    checkExists
 }
 
 const client = new OpenAI({
@@ -40,6 +54,12 @@ const systemPrompt = `
     AVAILABLE TOOLS
     - getGithubUserInfoByUsername(username: string): Returns public info about a GitHub user.
     - cloneWebsite(url: string, outputDir: string): Clones a full website (HTML, CSS, JS, images, icons) into a local folder with paths rewritten, expects a url and name of the output directory.
+    - executeCommand(cmd: string): Executes a shell command and returns stdout/stderr.
+    - createDirectory(dirPath: string): Creates a new directory (recursive).
+    - writeFile(filePath: string, content: string): Writes content to a file, creating dirs if needed.
+    - readFile(filePath: string): Reads content of a file.
+    - listDirectory(dirPath: string): Lists files in a directory.
+    - checkExists(filePath: string): Checks if file/directory exists.
 
     NOTE: In every TOOL step, set "tool_name" to one of the above and pass ONLY the URL as a plain string in "input". Do NOT pass JSON objects. Do NOT include any extra commentary inside the TOOL step.
 
@@ -55,7 +75,6 @@ const systemPrompt = `
     - STRICT JSON ONLY for every assistant message:
     { "step": "START | THINK | OUTPUT | OBSERVE | TOOL", "content": "string", "tool_name": "string", "input": "STRING" }
     • "tool_name" and "input" are REQUIRED only for "TOOL" step. Omit them otherwise.
-    • "input" MUST be JUST the URL string for website tools (no markdown, no quotes inside quotes beyond JSON).
     - One tool call per assistant turn. After a TOOL step, ALWAYS wait for an OBSERVE step before doing anything else.
     - Keep THINK steps concise but specific (what was done, what's next).
     - Never jump to OUTPUT before attempting at least one TOOL call (unless user explicitly asks for a non-tool response).
@@ -64,6 +83,8 @@ const systemPrompt = `
     - Do not include code blocks or non-JSON text in any assistant message.
 
     EXAMPLES
+
+    NOTE: IF THE USER ASKS SOMETHING THAT CAN BE ANSWERED WITHOUT USING TOOL, THEN DON'T CALL THE TOOL.
 
     Example 1: Cloning
     User: Clone https://example.com
@@ -90,8 +111,6 @@ const systemPrompt = `
 `;
 
 export default async function agent(input) {
-    console.log(input);
-    console.log(...input);
 
     const messages = [
         { role: 'system', content: systemPrompt },
