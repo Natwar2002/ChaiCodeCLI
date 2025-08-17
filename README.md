@@ -39,7 +39,7 @@ This project combines **automation, AI-driven workflows, and developer tools** i
   - Project directories  
   - HTML, CSS, JS files  
   - Starter templates for faster development  
-- Manage your files with h
+- Manage your files with helper tools:
 - `createDirectory`
   - `writeFile`
   - `readFile`
