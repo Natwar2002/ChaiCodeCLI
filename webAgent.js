@@ -23,7 +23,8 @@ const client = new OpenAI({
     baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
 });
 
-async function main() {
+export default async function webAgent(input) {
+
     const SYSTEM_PROMPT = `
         You are an expert AI assistant that builds websites using HTML, CSS (Tailwind), and JS.
 
@@ -69,7 +70,7 @@ async function main() {
         { role: "system", content: SYSTEM_PROMPT },
         {
             role: "user",
-            content: "Make an image carousel and for images take divs of multiple colors with height and width",
+            content: input,
         },
     ];
 
@@ -170,10 +171,5 @@ process.on("uncaughtException", (error) => {
 
 process.on("unhandledRejection", (reason, promise) => {
     console.error("- Unhandled Rejection:", reason);
-    process.exit(1);
-});
-
-main().catch((error) => {
-    console.error("- Main function error:", error.message);
     process.exit(1);
 });

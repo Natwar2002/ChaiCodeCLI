@@ -1,11 +1,9 @@
-#!/usr/bin/env node
-
 import inquirer from 'inquirer';
 import chalk from 'chalk';
 import figlet from 'figlet';
 import agent from './agent.js';
+import webAgent from './webAgent.js';
 
-// Display welcome message with ASCII art
 const displayWelcome = () => {
     console.clear();
 
@@ -77,17 +75,11 @@ const handleCloneWebsite = async () => {
 
         console.log(chalk.yellow('\n⏳ Processing your request...'));
 
-        // Simulate processing
         await agent(`The user wants to clone this website ${answers.url}`);
 
         console.log(chalk.green.bold('\n✅ SUCCESS!'));
         console.log(chalk.green(`🎉 Website cloning initiated successfully!`));
         console.log(chalk.gray(`URL: ${answers.url}`));
-        console.log(chalk.gray(`Output: ${answers.outputDir}`));
-        console.log(chalk.gray(`Include Assets: ${answers.includeAssets ? 'Yes' : 'No'}`));
-
-        // TODO: Call website cloning agent/tool here
-        // Example: await websiteCloningAgent.clone(answers.url, answers.outputDir, answers.includeAssets);
 
     } catch (error) {
         console.log(chalk.red('\n❌ Operation cancelled'));
@@ -112,42 +104,16 @@ const handleBuildWebsite = async () => {
             }
         },
         {
-            type: 'list',
-            name: 'template',
-            message: chalk.cyan('Choose a template:'),
-            choices: [
-                { name: '🚀 Modern Landing Page', value: 'landing' },
-                { name: '📱 Portfolio Website', value: 'portfolio' },
-                { name: '🏪 Business Website', value: 'business' },
-                { name: '📝 Blog Template', value: 'blog' },
-                { name: '🎨 Custom (AI Generated)', value: 'custom' }
-            ]
-        },
-        {
             type: 'input',
-            name: 'description',
-            message: chalk.cyan('Describe your website (for AI generation):'),
-            when: (answers) => answers.template === 'custom',
-            validate: (value, answers) => {
-                if (answers.template === 'custom' && (!value || value.trim() === '')) {
-                    return chalk.red('Please provide a description for AI generation');
+            name: 'projectDescription',
+            message: chalk.cyan('Enter project description:'),
+            validate: (value) => {
+                if (!value || value.trim() === '') {
+                    return chalk.red('Please enter a project description');
                 }
                 return true;
             }
         },
-        {
-            type: 'checkbox',
-            name: 'features',
-            message: chalk.cyan('Select additional features:'),
-            choices: [
-                { name: 'Responsive Design', value: 'responsive', checked: true },
-                { name: 'Dark Mode Toggle', value: 'darkmode' },
-                { name: 'Contact Form', value: 'contact' },
-                { name: 'Image Gallery', value: 'gallery' },
-                { name: 'Animation Effects', value: 'animations' },
-                { name: 'SEO Optimization', value: 'seo' }
-            ]
-        }
     ];
 
     try {
@@ -155,21 +121,14 @@ const handleBuildWebsite = async () => {
 
         console.log(chalk.yellow('\n⏳ Building your website...'));
 
-        // Simulate processing
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await webAgent(`The user wants to create a website ${answers.projectName} and the description of the website is ${answers.projectDescription}`)
 
         console.log(chalk.green.bold('\n✅ SUCCESS!'));
         console.log(chalk.green(`🎉 Website building initiated successfully!`));
         console.log(chalk.gray(`Project: ${answers.projectName}`));
-        console.log(chalk.gray(`Template: ${answers.template}`));
-        if (answers.description) {
+        if (answers.projectDescription) {
             console.log(chalk.gray(`Description: ${answers.description}`));
         }
-        console.log(chalk.gray(`Features: ${answers.features.join(', ')}`));
-
-        // TODO: Call website building agent/tool here
-        // Example: await websiteBuilderAgent.build(answers);
-
     } catch (error) {
         console.log(chalk.red('\n❌ Operation cancelled'));
     }

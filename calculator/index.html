@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .calculator {
+            @apply bg-gray-100 shadow-md rounded-lg overflow-hidden;
+            width: 320px;
+        }
+
+        .calculator-screen {
+            @apply w-full text-right text-3xl py-2 px-4 bg-gray-200;
+            height: 60px;
+        }
+
+        .calculator-keys {
+            @apply grid grid-cols-4 gap-1 p-1;
+        }
+
+        button {
+            @apply bg-white hover:bg-gray-300 py-3 px-4 rounded-lg text-xl font-semibold;
+            outline: none;
+        }
+
+        .operator {
+            @apply bg-gray-400 hover:bg-gray-500 text-white;
+        }
+
+        .equal-sign {
+            @apply bg-blue-500 hover:bg-blue-700 text-white col-span-2;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center h-screen bg-gray-200">
+    <div class="calculator">
+        <input type="text" class="calculator-screen" value="0" disabled />
+        <div class="calculator-keys">
+            <button>7</button>
+            <button>8</button>
+            <button>9</button>
+            <button class="operator">/</button>
+
+            <button>4</button>
+            <button>5</button>
+            <button>6</button>
+            <button class="operator">*</button>
+
+            <button>1</button>
+            <button>2</button>
+            <button>3</button>
+            <button class="operator">-</button>
+
+            <button>0</button>
+            <button class="decimal">.</button>
+            <button class="operator">+</button>
+            <button class="all-clear">AC</button>
+
+            <button class="equal-sign">=</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
