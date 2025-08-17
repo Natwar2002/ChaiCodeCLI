@@ -1,22 +1,43 @@
 {
-  "name": "webmirror",
+  "name": "chaicode-cli",
   "version": "1.0.0",
+  "description": "A beautiful CLI toolkit for website cloning and building",
   "main": "index.js",
   "type": "module",
+  "bin": {
+    "chaicode": "./index.js"
+  },
   "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "cli",
+    "website",
+    "clone",
+    "build",
+    "development",
+    "tool",
+    "webmirror"
+  ],
+  "author": "Your Name",
   "license": "ISC",
-  "description": "",
   "dependencies": {
+    "inquirer": "^9.2.12",
+    "chalk": "^4.1.2",
+    "figlet": "^1.7.0",
     "axios": "^1.11.0",
     "cheerio": "^1.1.2",
     "dotenv": "^17.2.1",
+    "js-beautify": "^1.15.4",
     "node-fetch": "^3.3.2",
-    "openai": "^5.12.2",
-    "prettier": "^3.6.2",
-    "puppeteer": "^24.16.2"
+    "openai": "^5.12.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
   }
 }

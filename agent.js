@@ -14,8 +14,15 @@ const client = new OpenAI({
 });
 
 const systemPrompt = `
-    You are an AI assistant that ALWAYS communicates using the strict sequence:
+    You are an AI assistant that solves tasks using tools.
+    ALWAYS communicates using the strict sequence:
     START → THINK → (optional TOOL → OBSERVE → THINK … repeated as needed) → OUTPUT
+
+    WORKFLOW:
+    1. START: Restate user's intent.
+    2. THINK: Decide if a tool is needed.
+    3. TOOL: Pick one tool (if required) and specify its input.
+    4. OUTPUT: After tool finishes, summarize result.
 
     Your job is to solve the user's request by decomposing it into small steps, calling tools one at a time, waiting for the OBSERVE result after each tool call, and continuing until you can confidently produce a final OUTPUT.
 
@@ -32,7 +39,7 @@ const systemPrompt = `
 
     AVAILABLE TOOLS
     - getGithubUserInfoByUsername(username: string): Returns public info about a GitHub user.
-    - cloneWebsite(url: string): Clones a full website (HTML, CSS, JS, images, icons) into a local folder with paths rewritten.
+    - cloneWebsite(url: string, outputDir: string): Clones a full website (HTML, CSS, JS, images, icons) into a local folder with paths rewritten, expects a url and name of the output directory.
 
     NOTE: In every TOOL step, set "tool_name" to one of the above and pass ONLY the URL as a plain string in "input". Do NOT pass JSON objects. Do NOT include any extra commentary inside the TOOL step.
 
@@ -62,7 +69,7 @@ const systemPrompt = `
     User: Clone https://example.com
     ASSISTANT: { "step": "START", "content": "User wants a full offline clone of https://example.com." }
     ASSISTANT: { "step": "THINK", "content": "Plan: use cloneWebsite to fetch HTML, CSS, JS, images, and icons in one step." }
-    ASSISTANT: { "step": "TOOL", "tool_name": "cloneWebsite", "input": "https://example.com", "content": "Cloning entire site into local folder." }
+    ASSISTANT: { "step": "TOOL", "tool_name": "cloneWebsite", "input": url = "https://example.com", outputDir= "name_of_the_output_directory_that_you_want", "content": "Cloning entire site into local folder." }
     DEVELOPER: { "step": "OBSERVE", "content": "✅ Saved → ./output/index.html, ./output/css/*, ./output/js/*, ./output/images/*" }
     ASSISTANT: { "step": "THINK", "content": "Clone completed successfully. Prepare summary." }
     ASSISTANT: { "step": "OUTPUT", "content": "Clone complete. Files saved in ./output with HTML, CSS, JS, and images. All references updated for offline use." }
@@ -82,19 +89,19 @@ const systemPrompt = `
     - For website tools, "input" MUST be exactly the URL string (e.g., "https://example.com").
 `;
 
+export default async function agent(input) {
+    console.log(input);
+    console.log(...input);
 
+    const messages = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `${input}` }
+    ];
 
-const messages = [
-    { role: 'system', content: systemPrompt },
-    { role: 'user', content: "Clone this website https://code.visualstudio.com/" }
-];
-
-export default async function agent() {
     try {
-        let step = 0;
-        while (step < 20) {
-            step++;
+        let parsedContent = null;
 
+        while (true) {
             const response = await client.chat.completions.create({
                 model: 'gemini-2.0-flash',
                 response_format: { type: 'json_object' },
@@ -102,55 +109,45 @@ export default async function agent() {
             });
 
             const rawContent = response.choices[0].message?.content;
-            const parsedContent = JSON.parse(rawContent);
+            parsedContent = JSON.parse(rawContent);
 
-            if (!parsedContent) break;
+            console.log("Parsed content: ", parsedContent);
 
-            messages.push({
-                role: 'assistant',
-                content: JSON.stringify(parsedContent)
-            });
-
-            if (parsedContent.step === "START") {
-                console.log("🤔 START:", parsedContent.content);
-                continue;
-            }
-
-            if (parsedContent.step === "THINK") {
-                console.log("💭 THINK:", parsedContent.content);
-                continue;
-            }
+            // push this assistant step into conversation history
+            messages.push({ role: 'assistant', content: JSON.stringify(parsedContent) });
 
             if (parsedContent.step === "TOOL") {
-                const toolToCall = parsedContent.tool_name;
-                if (!toolMap[toolToCall]) {
-                    console.log(`❌ No such tool: ${toolToCall}`);
-                    messages.push({
-                        role: 'developer',
-                        content: `There is no such tool as ${toolToCall}`
-                    });
-                    continue;
-                }
-
-                const responseFromTool = await toolMap[toolToCall](parsedContent.input);
-                console.log(`${toolToCall}(${parsedContent.input}) = `, responseFromTool);
-
-                messages.push({
-                    role: 'developer',
-                    content: JSON.stringify({ step: 'OBSERVE', content: responseFromTool }),
-                });
-                continue;
+                console.log("🛠️ TOOL step found:", parsedContent.tool_name, parsedContent.input);
+                break;
             }
-
-            if (parsedContent.step === 'OUTPUT') {
-                console.log("✅ OUTPUT:", parsedContent.content);
+            if (parsedContent.step === "OUTPUT") {
+                console.log("Result: ", parsedContent);
                 break;
             }
         }
-        console.log('Done...');
+
+        if (parsedContent && parsedContent.step === "TOOL" && toolMap[parsedContent.tool_name]) {
+            const toolResult = await toolMap[parsedContent.tool_name](parsedContent.input);
+
+            // Send OBSERVE back
+            const summaryMessages = [
+                ...messages,
+                { role: 'developer', content: JSON.stringify({ step: "OBSERVE", content: toolResult }) }
+            ];
+
+            const summaryResponse = await client.chat.completions.create({
+                model: 'gemini-2.0-flash',
+                response_format: { type: "json_object" },
+                messages: summaryMessages
+            });
+
+            const summaryRaw = summaryResponse.choices[0].message?.content;
+            const summary = JSON.parse(summaryRaw);
+            console.log('✅ Done:', summary);
+        } else {
+            console.log("⚠️ No tool to call. Agent output:", parsedContent?.content);
+        }
     } catch (error) {
         console.log("Error in agent", error);
     }
 }
-
-agent();
