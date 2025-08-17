@@ -19,7 +19,7 @@ const TOOL_MAP = {
 };
 
 const client = new OpenAI({
-    apiKey: process.env.AI_API_KEY,
+    apiKey: process.env.OPENAI_API_KEY,
     baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
 });
 

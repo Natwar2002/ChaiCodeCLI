@@ -11,9 +11,13 @@ This project combines **automation, AI-driven workflows, and developer tools** i
 ## ⚡ Setup & Installation
 
 **Clone this repository**
+
+  create a .env file in the root dir and write your API key.
+  OPENAI_API_KEY="your_api_key"    (If you're using any API key other then gemini, then change the model in the agent and webAgent)
+
    ```bash
    git clone https://github.com/Natwar2002/ChaiCodeCLI.git
-   cd WebMirror
+   cd ChaiCodeCLI
    
    npm install
    npm start
@@ -39,7 +43,7 @@ This project combines **automation, AI-driven workflows, and developer tools** i
   - Project directories  
   - HTML, CSS, JS files  
   - Starter templates for faster development  
-- Manage your files with h
+- Manage your files with helper tools:
 - `createDirectory`
   - `writeFile`
   - `readFile`

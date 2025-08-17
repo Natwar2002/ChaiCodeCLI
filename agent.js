@@ -2,28 +2,14 @@ import 'dotenv/config';
 import OpenAI from "openai";
 import getGithubUserInfoByUsername from './tools/getGithubUserInfoByUsername.js';
 import cloneWebsite from './tools/cloneWebsite.js';
-import {
-    executeCommand,
-    createDirectory,
-    writeFile,
-    readFile,
-    listDirectory,
-    checkExists
-} from './tools/createWebsite.js';
 
 const toolMap = {
     getGithubUserInfoByUsername,
     cloneWebsite,
-    executeCommand,
-    createDirectory,
-    writeFile,
-    readFile,
-    listDirectory,
-    checkExists
 }
 
 const client = new OpenAI({
-    apiKey: process.env.AI_API_KEY,
+    apiKey: process.env.OPENAI_API_KEY,
     baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/"
 });
 
